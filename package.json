@@ -1,0 +1,20 @@
+{
+  "name": "finance-web-app",
+  "version": "1.0.0",
+  "description": "Complete Finance Web App with MERN stack and AI features",
+  "main": "server/server.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "start": "cd server && npm start",
+    "build": "cd client && npm run build",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install"
+  },
+  "keywords": ["finance", "mern", "ai", "react", "nodejs", "mongodb"],
+  "author": "Finance App Developer",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

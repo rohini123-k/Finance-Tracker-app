@@ -1,0 +1,147 @@
+require('dotenv').config();
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const helmet = require('helmet');
+const compression = require('compression');
+const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
+const config = require('./config');
+
+const app = express();
+// server.js
+ 
+
+
+// CORS configuration - MUST be first
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:3001',
+    'http://127.0.0.1:3001'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: [
+    'Origin',
+    'X-Requested-With',
+    'Content-Type',
+    'Accept',
+    'Authorization',
+    'Cache-Control'
+  ],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  optionsSuccessStatus: 200
+};
+
+// Apply CORS first
+app.use(cors(corsOptions));
+
+// ✅ Fix express-rate-limit warning
+app.set('trust proxy', 1);
+
+// Security middleware
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' }
+  })
+);
+app.use(compression());
+
+// Rate limiting - applied after CORS
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000,
+  skip: (req) => {
+    return req.path === '/api/health' || req.method === 'OPTIONS';
+  }
+});
+
+// Stricter limiter for notifications
+const notificationLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 10,
+  message: 'Too many notification requests, please try again later',
+  skip: (req) => req.method === 'OPTIONS'
+});
+
+app.use(limiter);
+app.use('/api/notifications', notificationLimiter);
+
+// Body parsing
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Logging
+if (config.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
+
+// MongoDB connection
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(config.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000
+    });
+
+    console.log(`MongoDB connected: ${conn.connection.host}`);
+  } catch (error) {
+    console.error('MongoDB connection failed:', error.message);
+    if (config.NODE_ENV === 'development') {
+      console.log('Continuing in development mode without DB...');
+    } else {
+      process.exit(1);
+    }
+  }
+};
+connectDB();
+
+// Routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/transactions', require('./routes/transactions'));
+app.use('/api/budgets', require('./routes/budgets'));
+app.use('/api/goals', require('./routes/goals'));
+app.use('/api/investments', require('./routes/investments'));
+app.use('/api/reports', require('./routes/reports'));
+app.use('/api/chatbot', require('./routes/chatbot')); // ✅ chatbot route
+app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/admin', require('./routes/admin'));
+
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    environment: config.NODE_ENV,
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  });
+});
+
+// ✅ Removed old `/api/assistant` route
+
+// Error handling
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    message: 'Something went wrong!',
+    error: config.NODE_ENV === 'development' ? err.message : 'Internal server error'
+  });
+});
+
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({ message: 'Route not found' });
+});
+
+const PORT = config.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT} in ${config.NODE_ENV} mode`);
+  console.log(`Health check: http://localhost:${PORT}/api/health`);
+});
+
+module.exports = app;

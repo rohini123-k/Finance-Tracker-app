@@ -1,0 +1,128 @@
+import React, { useEffect, useRef, useState } from "react";
+import "./FinanceChatBot.css"; // ✅ Import CSS
+
+export default function FinanceChatBot({ apiEndpoint = "/api/chatbot/chat" }) {
+
+
+  const [open, setOpen] = useState(false);
+  const [messages, setMessages] = useState(() => {
+    const saved = localStorage.getItem("finance-chat-messages");
+    return saved
+      ? JSON.parse(saved)
+      : [
+          {
+            id: 1,
+            role: "assistant",
+            text: "Hi! I'm your Finance Assistant. Ask me about your expenses, income, budgets, or reports!",
+          },
+        ];
+  });
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    localStorage.setItem("finance-chat-messages", JSON.stringify(messages));
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const appendMessage = (msg) =>
+    setMessages((prev) => [...prev, { ...msg, id: Date.now() }]);
+
+ const handleSend = async () => {
+  if (!input.trim()) return;
+  const userMsg = { role: "user", text: input };
+  appendMessage(userMsg);
+  setInput("");
+  setLoading(true);
+
+  try {
+    const res = await fetch(apiEndpoint, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}` // if JWT auth
+      },
+      body: JSON.stringify({ message: input }),
+    });
+    if (!res.ok) throw new Error("Failed to fetch");
+
+    const data = await res.json();
+     appendMessage({ role: "assistant", text: data.response || data.reply || "(no reply)" });
+
+  } catch (err) {
+    appendMessage({
+      role: "assistant",
+      text: "Sorry, I couldn't reach the finance assistant.",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+  return (
+    <div className="chatbot-container">
+      {/* Floating Button */}
+      {!open && (
+        <button onClick={() => setOpen(true)} className="chatbot-button">
+          💰
+        </button>
+      )}
+
+      {/* Chat Window */}
+      {open && (
+        <div className="chatbot-window">
+          {/* Header */}
+      <div className="chatbot-header">
+  <button 
+    onClick={() => {
+      localStorage.removeItem("finance-chat-messages");
+      setMessages([]);
+    }} 
+    className="chatbot-clear"
+    title="Clear Chat"
+  >
+    🗑️
+  </button>
+
+  <div className="chatbot-title">Finance Assistant</div>
+
+  <button onClick={() => setOpen(false)} className="chatbot-close">
+    ✕
+  </button>
+</div>
+
+
+
+
+          {/* Messages */}
+          <div className="chatbot-messages">
+            {messages.map((m) => (
+              <div
+                key={m.id}
+                className={`message-row ${m.role === "user" ? "user" : "assistant"}`}
+              >
+                <div className={`message-bubble ${m.role}`}>{m.text}</div>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input */}
+          <div className="chatbot-input">
+            <input
+              placeholder="Ask about expenses, income, budgets..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
+            />
+            <button onClick={handleSend} disabled={loading}>
+              {loading ? "..." : "Send"}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
