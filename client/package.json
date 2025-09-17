@@ -55,12 +55,13 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "https://finance-tracker-app-ihdp.onrender.com",
+  "proxy": "https://finance-tracker-app-ihdp.onrender.com/api",
   "devDependencies": {
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.13"
   }
 }
+
 
 
