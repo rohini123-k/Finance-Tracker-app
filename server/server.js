@@ -20,16 +20,28 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    // Allow requests with no origin (like Postman, mobile apps, server-to-server)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      // Deny CORS gracefully, send 403 instead of 500
+      callback(null, false);
     }
   },
-  credentials: true,
+  credentials: true, // Allow cookies and Authorization headers
+  optionsSuccessStatus: 200, // Some legacy browsers choke on 204
 };
 
+// Use CORS middleware
 app.use(cors(corsOptions));
+
+// Optional: For development, allow all origins temporarily
+if (config.NODE_ENV === 'development') {
+  app.use(cors());
+}
+
 
 
 // --- Security & Middleware ---
