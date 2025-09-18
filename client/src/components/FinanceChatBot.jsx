@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./FinanceChatBot.css";
 
-const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+const BASE_URL = process.env.REACT_APP_API_URL || "https://finance-tracker-app-ihdp.onrender.com/api";
+
+
 
 export default function FinanceChatBot({ apiEndpoint }) {
   // Use passed prop OR default to BASE_URL
-  apiEndpoint = apiEndpoint || `${BASE_URL}/chatbot/chat`;
+const apiEndpoint = `${BASE_URL}/chatbot/chat`;
 
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState(() => {
@@ -133,5 +135,6 @@ export default function FinanceChatBot({ apiEndpoint }) {
     </div>
   );
 }
+
 
 
