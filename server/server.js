@@ -34,10 +34,7 @@ const corsOptions = {
 // Use CORS middleware
 
 app.use(cors(corsOptions));
-app.use(cors({
-  origin: "*",
-  credentials: true
-}));
+ 
 
 
 // --- Security & Middleware ---
