@@ -3,7 +3,10 @@ import "./FinanceChatBot.css";
 
 const BASE_URL =
   process.env.REACT_APP_API_URL ||
-  "https://finance-tracker-app-ihdp.onrender.com/api";
+  (window.location.hostname === "localhost"
+    ? "http://localhost:5000/api"
+    : "https://finance-tracker-app-ihdp.onrender.com/api");
+
 
 export default function FinanceChatBot({ apiEndpoint: propEndpoint }) {
   // Use passed prop OR default to BASE_URL/chatbot/chat
@@ -136,3 +139,4 @@ export default function FinanceChatBot({ apiEndpoint: propEndpoint }) {
     </div>
   );
 }
+
