@@ -1,8 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import "./FinanceChatBot.css"; // ✅ Import CSS
+import "./FinanceChatBot.css";
 
-export default function FinanceChatBot({ apiEndpoint = "/api/chatbot/chat" }) {
+const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
+export default function FinanceChatBot({ apiEndpoint }) {
+  // Use passed prop OR default to BASE_URL
+  apiEndpoint = apiEndpoint || `${BASE_URL}/chatbot/chat`;
 
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState(() => {
@@ -20,6 +23,10 @@ export default function FinanceChatBot({ apiEndpoint = "/api/chatbot/chat" }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
+
+  // ... rest of your component
+}
+
 
   useEffect(() => {
     localStorage.setItem("finance-chat-messages", JSON.stringify(messages));
@@ -126,3 +133,4 @@ export default function FinanceChatBot({ apiEndpoint = "/api/chatbot/chat" }) {
     </div>
   );
 }
+
