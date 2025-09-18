@@ -25,7 +25,7 @@ export default function FinanceChatBot({ apiEndpoint }) {
   const messagesEndRef = useRef(null);
 
   // ... rest of your component
-}
+
 
 
   useEffect(() => {
@@ -133,4 +133,5 @@ export default function FinanceChatBot({ apiEndpoint }) {
     </div>
   );
 }
+
 
