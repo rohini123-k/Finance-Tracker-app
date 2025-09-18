@@ -28,24 +28,25 @@ if (config.NODE_ENV === 'production') {
 
 // CORS configuration - MUST be first
 const corsOptions = {
-  origin: [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://localhost:3001',
-    'http://127.0.0.1:3001',
-    'https://finance-tracker-app-1-x6eu.onrender.com' // ✅ Add this frontend domain
-  ],
+  origin: (origin, callback) => {
+    // Allow requests from localhost (dev) OR same-origin in production
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+      'http://localhost:3001',
+      'http://127.0.0.1:3001',
+    ];
+
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: [
-    'Origin',
-    'X-Requested-With',
-    'Content-Type',
-    'Accept',
-    'Authorization',
-    'Cache-Control'
-  ]
 };
+app.use(cors(corsOptions));
+
 
 
 // Apply CORS first
