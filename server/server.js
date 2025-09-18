@@ -32,12 +32,13 @@ const corsOptions = {
 };
 
 // Use CORS middleware
+
+app.use(cors(corsOptions));
 app.use(cors({
   origin: "*",
   credentials: true
 }));
 
-app.use(cors(corsOptions));
 
 // --- Security & Middleware ---
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
