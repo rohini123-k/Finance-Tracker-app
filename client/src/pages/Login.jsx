@@ -185,7 +185,7 @@ const Login = () => {
                 }
                 label="Remember me"
               />
-              <Link
+{/*               <Link
                 component={RouterLink}
                 to="/forgot-password"
                 variant="body2"
@@ -193,7 +193,7 @@ const Login = () => {
                 sx={{ textDecoration: 'none' }}
               >
                 Forgot password?
-              </Link>
+              </Link> */}
             </Box>
 
             <Button
@@ -255,3 +255,4 @@ const Login = () => {
 };
 
 export default Login;
+
