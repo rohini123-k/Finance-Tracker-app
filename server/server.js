@@ -7,11 +7,24 @@ const compression = require('compression');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const config = require('./config');
+const path = require('path');
 
 const app = express();
 // server.js
  
 
+
+
+// --- Serve React frontend ---
+if (config.NODE_ENV === 'production') {
+  const clientPath = path.join(__dirname, 'client/build');
+  app.use(express.static(clientPath));
+
+  // Catch-all: for React Router
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(clientPath, 'index.html'));
+  });
+}
 
 // CORS configuration - MUST be first
 const corsOptions = {
