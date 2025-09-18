@@ -12,60 +12,29 @@ const path = require('path');
 const app = express();
 
 // --- CORS Configuration ---
-// const allowedOrigins = [
-//   'http://localhost:3000',
-//   'https://finance-tracker-app-1-x6eu.onrender.com' // deployed frontend
-// ];
-
-// const corsOptions = {
-//   origin: function(origin, callback) {
-//     // allow requests with no origin (Postman, server-to-server)
-//     if (!origin) return callback(null, true);
-
-//     if (allowedOrigins.includes(origin)) return callback(null, true);
-
-//     // deny other origins gracefully
-//     callback(new Error('Not allowed by CORS'));
-//   },
-//   credentials: true, // allow cookies / authorization headers
-//   optionsSuccessStatus: 200 // legacy browsers
-// };
-
-// // Use CORS middleware
-
-// app.use(cors(corsOptions));
-
-
-
-const cors = require("cors");
-
 const allowedOrigins = [
-  "http://localhost:3000", // local dev
-'https://finance-tracker-app-1-x6eu.onrender.com' // your hosted frontend
+  'http://localhost:3000',
+  'https://finance-tracker-app-1-x6eu.onrender.com'
 ];
 
-app.use(cors({
-  origin: function(origin, callback){
-    // allow requests with no origin (like Postman)
-    if(!origin) return callback(null, true);
-    if(allowedOrigins.indexOf(origin) === -1){
-      const msg = `The CORS policy for this site does not allow access from the specified Origin.`;
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // allow Postman/server
+    const originClean = origin.replace(/\/$/, "");
+    if (allowedOrigins.includes(originClean)) return callback(null, true);
+    console.warn(`Blocked CORS request from: ${origin}`);
+    return callback(new Error("Not allowed by CORS"));
   },
-  credentials: true
-}));
+  credentials: true,
+  optionsSuccessStatus: 200
+};
 
- 
-
-
-// --- Security & Middleware ---
-app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+app.use(cors(corsOptions)); // must be first
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(compression());
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.set('trust proxy', 1);
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.set("trust proxy", 1);
 
 // --- Logging ---
 if (config.NODE_ENV === 'development') {
@@ -79,15 +48,7 @@ const limiter = rateLimit({
   skip: (req) => req.path === '/api/health' || req.method === 'OPTIONS'
 });
 
-const notificationLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000,
-  max: 10,
-  message: 'Too many notification requests, please try again later',
-  skip: (req) => req.method === 'OPTIONS'
-});
-
 app.use(limiter);
-app.use('/api/notifications', notificationLimiter);
 
 // --- MongoDB Connection ---
 const connectDB = async () => {
