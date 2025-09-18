@@ -10,78 +10,48 @@ const config = require('./config');
 const path = require('path');
 
 const app = express();
-// server.js
- 
 
-
-
-// --- Serve React frontend ---
-if (config.NODE_ENV === 'production') {
-  const clientPath = path.join(__dirname, 'client/build');
-  app.use(express.static(clientPath));
-
-  // Catch-all: for React Router
-  app.get('*', (req, res) => {
-    res.sendFile(path.resolve(clientPath, 'index.html'));
-  });
-}
-
-// CORS configuration - MUST be first
+// --- CORS Configuration ---
 const allowedOrigins = [
   'http://localhost:3000',
   'http://127.0.0.1:3000',
   'http://localhost:3001',
   'http://127.0.0.1:3001',
-  'https://finance-tracker-app-1-x6eu.onrender.com' // ✅ Add your frontend domain
+  'https://finance-tracker-app-1-x6eu.onrender.com'
 ];
 
-const corsOptions = {
+app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
+    if (!origin || allowedOrigins.includes(origin)) callback(null, true);
+    else callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
-};
+  optionsSuccessStatus: 200
+}));
 
-app.use(cors(corsOptions));
+app.options('*', cors()); // preflight
 
-
-
-
-
-
-
-// Apply CORS first
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
-
-
-// ✅ Fix express-rate-limit warning
+// --- Security & Middleware ---
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+app.use(compression());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.set('trust proxy', 1);
 
-// Security middleware
-app.use(
-  helmet({
-    crossOriginResourcePolicy: { policy: 'cross-origin' }
-  })
-);
-app.use(compression());
+// --- Logging ---
+if (config.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
 
-// Rate limiting - applied after CORS
+// --- Rate Limiting ---
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 1000,
-  skip: (req) => {
-    return req.path === '/api/health' || req.method === 'OPTIONS';
-  }
+  skip: (req) => req.path === '/api/health' || req.method === 'OPTIONS'
 });
 
-// Stricter limiter for notifications
 const notificationLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
+  windowMs: 1 * 60 * 1000,
   max: 10,
   message: 'Too many notification requests, please try again later',
   skip: (req) => req.method === 'OPTIONS'
@@ -90,16 +60,7 @@ const notificationLimiter = rateLimit({
 app.use(limiter);
 app.use('/api/notifications', notificationLimiter);
 
-// Body parsing
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// Logging
-if (config.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
-}
-
-// MongoDB connection
+// --- MongoDB Connection ---
 const connectDB = async () => {
   try {
     const conn = await mongoose.connect(config.MONGO_URI, {
@@ -109,7 +70,6 @@ const connectDB = async () => {
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000
     });
-
     console.log(`MongoDB connected: ${conn.connection.host}`);
   } catch (error) {
     console.error('MongoDB connection failed:', error.message);
@@ -122,18 +82,18 @@ const connectDB = async () => {
 };
 connectDB();
 
-// Routes
+// --- API Routes ---
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/transactions', require('./routes/transactions'));
 app.use('/api/budgets', require('./routes/budgets'));
 app.use('/api/goals', require('./routes/goals'));
 app.use('/api/investments', require('./routes/investments'));
 app.use('/api/reports', require('./routes/reports'));
-app.use('/api/chatbot', require('./routes/chatbot')); // ✅ chatbot route
+app.use('/api/chatbot', require('./routes/chatbot'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/admin', require('./routes/admin'));
 
-// Health check
+// --- Health Check ---
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'OK',
@@ -143,9 +103,17 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// ✅ Removed old `/api/assistant` route
+// --- Serve React Frontend in Production ---
+if (config.NODE_ENV === 'production') {
+  const clientPath = path.join(__dirname, 'client/build');
+  app.use(express.static(clientPath));
 
-// Error handling
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(clientPath, 'index.html'));
+  });
+}
+
+// --- Error Handling ---
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
@@ -154,11 +122,12 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 handler
+// --- 404 Handler ---
 app.use('*', (req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
+// --- Start Server ---
 const PORT = config.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT} in ${config.NODE_ENV} mode`);
