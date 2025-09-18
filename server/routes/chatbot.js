@@ -10,12 +10,12 @@ const GEMINI_API_KEY = process.env.OPENAI_API_KEY|| "YOUR_FALLBACK_KEY";
 const responses = {
   hi: "Hello! I'm your personal finance assistant. How can I help you manage your money better today?",
   hello: "Hi there! I'm here to help with all your finance questions. What would you like to know?",
-  income: "Your total income this month is ₹80.00.",
+  // income: "Your total income this month is ₹80.00.",
   expenses: "Your total expenses this month are ₹35%.",
   budget: "You have used 25% of your monthly budget (₹20,000 out of ₹80,000). You're doing great with your spending control!",
-  savings: "Your total savings balance is ₹3,50,000.",
-  investment: "You have invested ₹5,00,000 across stocks, mutual funds, and FD.",
-  insurance: "Your life insurance cover is ₹50,00,000 with a yearly premium of ₹12,000.",
+  // savings: "Your total savings balance is ₹3,50,000.",
+  // investment: "You have invested ₹5,00,000 across stocks, mutual funds, and FD.",
+  // insurance: "Your life insurance cover is ₹50,00,000 with a yearly premium of ₹12,000.",
   bills: "Your electricity bill is ₹2,000 and internet bill is ₹1,000.",
   loan: "Your outstanding home loan is ₹10,00,000 with a monthly EMI of ₹25,000.",
   tax: "Your estimated income tax for this year is ₹15,000.",
@@ -150,3 +150,4 @@ router.get("/health", (req, res) => {
 });
 
 module.exports = router;
+
