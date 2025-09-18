@@ -51,8 +51,13 @@ app.use(cors(corsOptions));
 
 
 
+
+
+
 // Apply CORS first
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+
 
 // ✅ Fix express-rate-limit warning
 app.set('trust proxy', 1);
