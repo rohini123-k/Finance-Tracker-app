@@ -33,7 +33,7 @@ const corsOptions = {
     'http://127.0.0.1:3000',
     'http://localhost:3001',
     'http://127.0.0.1:3001',
-    'https://finance-tracker-app-1-riwz.onrender.com' // ✅ frontend Render URL
+    'https://finance-tracker-app-1-x6eu.onrender.com' // ✅ Add this frontend domain
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -44,10 +44,9 @@ const corsOptions = {
     'Accept',
     'Authorization',
     'Cache-Control'
-  ],
-  exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  optionsSuccessStatus: 200
+  ]
 };
+
 
 // Apply CORS first
 app.use(cors(corsOptions));
