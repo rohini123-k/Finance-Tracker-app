@@ -13,26 +13,18 @@ const app = express();
 
 // --- CORS Configuration ---
 const allowedOrigins = [
-  'http://localhost:3000',
-  'http://127.0.0.1:3000',
-  'https://finance-tracker-app-1-x6eu.onrender.com' // your deployed frontend
+  'http://localhost:3000', 
+  'https://finance-tracker-app-1-x6eu.onrender.com'
 ];
 
-const corsOptions = {
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like Postman, mobile apps, server-to-server)
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      // Deny CORS gracefully, send 403 instead of 500
-      callback(null, false);
-    }
+app.use(cors({
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true); // allow Postman, etc.
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
   },
-  credentials: true, // Allow cookies and Authorization headers
-  optionsSuccessStatus: 200, // Some legacy browsers choke on 204
-};
+  credentials: true // allow cookies / authorization headers
+}));
 
 // Use CORS middleware
 app.use(cors(corsOptions));
