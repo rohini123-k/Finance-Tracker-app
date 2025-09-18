@@ -15,21 +15,22 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:3000',
   'http://127.0.0.1:3000',
-  'http://localhost:3001',
-  'http://127.0.0.1:3001',
-  'https://finance-tracker-app-1-x6eu.onrender.com'
+  'https://finance-tracker-app-1-x6eu.onrender.com' // your deployed frontend
 ];
 
-app.use(cors({
+const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) callback(null, true);
-    else callback(new Error('Not allowed by CORS'));
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
   },
   credentials: true,
-  optionsSuccessStatus: 200
-}));
+};
 
-app.options('*', cors()); // preflight
+app.use(cors(corsOptions));
+
 
 // --- Security & Middleware ---
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
