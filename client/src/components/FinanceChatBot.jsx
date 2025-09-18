@@ -1,16 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./FinanceChatBot.css";
 
-const BASE_URL =
-  process.env.REACT_APP_API_URL ||
-  (window.location.hostname === "localhost"
-    ? "http://localhost:5000/api"
-    : "https://finance-tracker-app-ihdp.onrender.com/api");
+// Updated BASE_URL to include /api
+const BASE_URL = "https://finance-tracker-app-ihdp.onrender.com/api";
+
 
 
 export default function FinanceChatBot({ apiEndpoint: propEndpoint }) {
   // Use passed prop OR default to BASE_URL/chatbot/chat
-  const apiEndpoint = propEndpoint || `${BASE_URL}/chatbot/chat`;
+ const apiEndpoint = `${BASE_URL}/chatbot/chat`;
 
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState(() => {
@@ -29,7 +27,7 @@ export default function FinanceChatBot({ apiEndpoint: propEndpoint }) {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Scroll to bottom and save messages to localStorage
+  // Scroll to bottom and save messages
   useEffect(() => {
     localStorage.setItem("finance-chat-messages", JSON.stringify(messages));
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -53,22 +51,26 @@ export default function FinanceChatBot({ apiEndpoint: propEndpoint }) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`,
+          // Remove Authorization unless your backend requires it
         },
         body: JSON.stringify({ message: input }),
       });
 
-      if (!res.ok) throw new Error("Failed to fetch");
+      if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
 
       const data = await res.json();
+      console.log("Chatbot Response:", data); // Debug response
+
+      // Use response from backend (adjust field if different)
       appendMessage({
         role: "assistant",
-        text: data.response || data.reply || "(no reply)",
+        text: data.response || data.reply || data.message || "(no reply)",
       });
     } catch (err) {
+      console.error("Chatbot Error:", err);
       appendMessage({
         role: "assistant",
-        text: "Sorry, I couldn't reach the finance assistant. Please try again later.",
+        text: "⚠️ Sorry, I couldn't reach the finance assistant. Please try again later.",
       });
     } finally {
       setLoading(false);
@@ -99,7 +101,11 @@ export default function FinanceChatBot({ apiEndpoint: propEndpoint }) {
         <div className="chatbot-window">
           {/* Header */}
           <div className="chatbot-header">
-            <button onClick={handleClear} className="chatbot-clear" title="Clear Chat">
+            <button
+              onClick={handleClear}
+              className="chatbot-clear"
+              title="Clear Chat"
+            >
               🗑️
             </button>
             <div className="chatbot-title">Finance Assistant</div>
@@ -113,7 +119,9 @@ export default function FinanceChatBot({ apiEndpoint: propEndpoint }) {
             {messages.map((m) => (
               <div
                 key={m.id}
-                className={`message-row ${m.role === "user" ? "user" : "assistant"}`}
+                className={`message-row ${
+                  m.role === "user" ? "user" : "assistant"
+                }`}
               >
                 <div className={`message-bubble ${m.role}`}>{m.text}</div>
               </div>
@@ -139,4 +147,3 @@ export default function FinanceChatBot({ apiEndpoint: propEndpoint }) {
     </div>
   );
 }
-
