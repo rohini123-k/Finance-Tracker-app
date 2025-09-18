@@ -12,28 +12,51 @@ const path = require('path');
 const app = express();
 
 // --- CORS Configuration ---
+// const allowedOrigins = [
+//   'http://localhost:3000',
+//   'https://finance-tracker-app-1-x6eu.onrender.com' // deployed frontend
+// ];
+
+// const corsOptions = {
+//   origin: function(origin, callback) {
+//     // allow requests with no origin (Postman, server-to-server)
+//     if (!origin) return callback(null, true);
+
+//     if (allowedOrigins.includes(origin)) return callback(null, true);
+
+//     // deny other origins gracefully
+//     callback(new Error('Not allowed by CORS'));
+//   },
+//   credentials: true, // allow cookies / authorization headers
+//   optionsSuccessStatus: 200 // legacy browsers
+// };
+
+// // Use CORS middleware
+
+// app.use(cors(corsOptions));
+
+
+
+const cors = require("cors");
+
 const allowedOrigins = [
-  'http://localhost:3000',
-  'https://finance-tracker-app-1-x6eu.onrender.com' // deployed frontend
+  "http://localhost:3000", // local dev
+'https://finance-tracker-app-1-x6eu.onrender.com' // your hosted frontend
 ];
 
-const corsOptions = {
-  origin: function(origin, callback) {
-    // allow requests with no origin (Postman, server-to-server)
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-
-    // deny other origins gracefully
-    callback(new Error('Not allowed by CORS'));
+app.use(cors({
+  origin: function(origin, callback){
+    // allow requests with no origin (like Postman)
+    if(!origin) return callback(null, true);
+    if(allowedOrigins.indexOf(origin) === -1){
+      const msg = `The CORS policy for this site does not allow access from the specified Origin.`;
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
   },
-  credentials: true, // allow cookies / authorization headers
-  optionsSuccessStatus: 200 // legacy browsers
-};
+  credentials: true
+}));
 
-// Use CORS middleware
-
-app.use(cors(corsOptions));
  
 
 
