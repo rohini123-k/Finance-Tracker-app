@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://finance-tracker-app-ihdp.onrender.com/api';
- const API_BASE_URL = 'https://finance-tracker-app-ihdp.onrender.com/api' ;
+ const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://finance-tracker-app-ihdp.onrender.com/api';
+ 
 // Create axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
