@@ -13,28 +13,26 @@ const app = express();
 
 // --- CORS Configuration ---
 const allowedOrigins = [
-  'http://localhost:3000', 
-  'https://finance-tracker-app-1-x6eu.onrender.com'
+  'http://localhost:3000',
+  'https://finance-tracker-app-1-x6eu.onrender.com' // deployed frontend
 ];
 
-app.use(cors({
+const corsOptions = {
   origin: function(origin, callback) {
-    if (!origin) return callback(null, true); // allow Postman, etc.
+    // allow requests with no origin (Postman, server-to-server)
+    if (!origin) return callback(null, true);
+
     if (allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error('Not allowed by CORS'));
+
+    // deny other origins gracefully
+    callback(new Error('Not allowed by CORS'));
   },
-  credentials: true // allow cookies / authorization headers
-}));
+  credentials: true, // allow cookies / authorization headers
+  optionsSuccessStatus: 200 // legacy browsers
+};
 
 // Use CORS middleware
 app.use(cors(corsOptions));
-
-// Optional: For development, allow all origins temporarily
-if (config.NODE_ENV === 'development') {
-  app.use(cors());
-}
-
-
 
 // --- Security & Middleware ---
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
