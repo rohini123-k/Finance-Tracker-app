@@ -115,7 +115,7 @@ const Dashboard = () => {
   //   { month: 'May', income: 5300, expenses: 3600, savings: 1700 },
   //   { month: 'Jun', income: 5100, expenses: 3300, savings: 1800 }
   // ];
- const monthlyTrends = [
+const monthlyTrends = [
   { month: 'Jan', income: 5000, expenses: 3500, savings: 1500 },
   { month: 'Feb', income: 5200, expenses: 3800, savings: 1400 },
   { month: 'Mar', income: 4800, expenses: 3200, savings: 1600 },
@@ -124,10 +124,10 @@ const Dashboard = () => {
   { month: 'Jun', income: 5100, expenses: 3300, savings: 1800 },
   { month: 'Jul', income: 5600, expenses: 3900, savings: 1700 },
   { month: 'Aug', income: 5800, expenses: 4100, savings: 1700 },
-  { month: 'Sep', income: 6000, expenses: 4200, savings: 1800 },
-  { month: 'Oct', income: 6200, expenses: 4400, savings: 1800 },
-  { month: 'Nov', income: 6400, expenses: 4600, savings: 1800 },
-  { month: 'Dec', income: 7000, expenses: 5000, savings: 2000 }
+  { month: 'Sep', income: 6000, expenses: 3600, savings: 1800 },
+  { month: 'Oct', income: 5800, expenses: 3000, savings: 1800 },
+  { month: 'Nov', income: 6000, expenses: 4600, savings: 1800 },
+  { month: 'Dec', income: 5800, expenses: 3600, savings: 2000 }
 ];
 
 
@@ -462,4 +462,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
 
